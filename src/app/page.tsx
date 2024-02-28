@@ -5,26 +5,40 @@ import {
   IconCamera,
   IconHelp,
   IconMicrophone,
+  IconPlayerPauseFilled,
   IconPlayerPlayFilled,
   IconPlus,
   IconSettings,
   IconWaveSine,
 } from "@tabler/icons-react";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 import { Tooltip } from "react-tooltip";
+
+interface AudioFile {
+  id: number;
+  name: string;
+  url: string;
+  duration: number;
+  width: string;
+  artist: string;
+  albumArt: string;
+}
 
 export default function page() {
   // assuming that timeline is of 10min
 
-  const [audioFiles, setAudioFiles] = React.useState<any[]>([]);
-  const [timelineWidth, setTimelineWidth] = React.useState<number>(0);
+  const [audioFiles, setAudioFiles] = useState<any[]>([]);
+  const [timelineWidth, setTimelineWidth] = useState<number>(0);
+  const [bufferTime, setBufferTime] = useState<number>(0); // [0, 600] 10min timeline assuming
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleAddAudio = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.multiple = true;
+    input.multiple = false;
     input.accept = "audio/*";
     input.addEventListener("change", handleFileChange);
     input.click();
@@ -63,22 +77,91 @@ export default function page() {
   };
 
   function onTimelineDragStop(e) {
-    const percentage =
-      (e.clientX / document.getElementById("timeline")?.clientWidth) * 100;
-    let durationInSec = (percentage / 100) * 60 * 10; // 10min timeline assuming
+    const timelineElement = document.getElementById("timeline");
+    const timelineRect = timelineElement.getBoundingClientRect();
+    const percentage = (e.clientX - timelineRect.left) / timelineRect.width;
+    let durationInSec = percentage * 600; // Assuming 10 minutes timeline
     if (durationInSec > 600) durationInSec = 600; // handle max duration
-    console.log(durationInSec, percentage);
-    audioRef.current.currentTime = durationInSec;
-    setTimelineWidth(e.clientWidth);
+
+    let cumulativeDuration = 0;
+    let selectedAudioIndex = -1;
+    for (let i = 0; i < audioFiles.length; i++) {
+      if (cumulativeDuration + audioFiles[i].duration >= durationInSec) {
+        selectedAudioIndex = i;
+        break;
+      }
+      cumulativeDuration += audioFiles[i].duration;
+    }
+
+    if (selectedAudioIndex !== -1) {
+      const selectedAudio = audioFiles[selectedAudioIndex];
+      const currentTimeInSelectedAudio = durationInSec - cumulativeDuration;
+
+      audioRef.current.src = selectedAudio.url;
+      audioRef.current.currentTime = currentTimeInSelectedAudio;
+      audioRef.current.load();
+      audioRef.current.play();
+
+      setTimelineWidth(e.clientX);
+      setIsDragging(false);
+    }
   }
 
   function handleTimeUpdate() {
+    if (isDragging) return;
     setTimelineWidth(
-      (audioRef.current?.currentTime / 600) *
+      ((audioRef.current?.currentTime + bufferTime) / 600) *
         document.getElementById("timeline")?.clientWidth
     );
   }
-  console.log(audioFiles);
+
+  function handleEnded() {
+    const currentAudioIndex = audioFiles.findIndex(
+      (audio) => audio.url === audioRef.current.src
+    );
+    if (currentAudioIndex === audioFiles.length - 1 && audioRef.current) {
+      setBufferTime(0);
+      setTimelineWidth(0);
+      audioRef.current.src = audioFiles[0].url;
+      audioRef.current.load();
+      audioRef.current.play();
+    }
+    if (
+      audioFiles &&
+      audioFiles.length > 0 &&
+      currentAudioIndex >= 0 &&
+      currentAudioIndex < audioFiles.length
+    ) {
+      let sum = 0;
+      for (let i = 0; i <= currentAudioIndex; i++) {
+        sum += audioFiles[i].duration;
+      }
+      setBufferTime(sum);
+    }
+    if (audioRef.current && currentAudioIndex < audioFiles.length - 1) {
+      const nextAudio = audioFiles[currentAudioIndex + 1];
+      audioRef.current.src = nextAudio.url;
+      audioRef.current.load();
+      audioRef.current.play();
+    }
+  }
+
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  function handlePlayPauseButtonClick() {
+    if (audioFiles.length === 0) return;
+    setIsPlaying((prevState) => !prevState);
+  }
+
+  console.log(audioFiles, bufferTime);
 
   return (
     <main className="min-h-[100vh] h-[100vh] flex flex-col justify-between relative">
@@ -128,13 +211,24 @@ export default function page() {
               className="stroke-1 w-7 h-7 opacity-75 hover:opacity-100 transition-all ease-in-out cursor-pointer"
             />
           </div>
-          {/* Play Pause field : tbi */}
-          <div className="">
-            <IconPlayerPlayFilled
-              data-tooltip-id="tooltip"
-              data-tooltip-content="Play"
-              className="stroke-1 w-7 h-7 opacity-75 hover:opacity-100 transition-all ease-in-out cursor-pointer"
-            />
+          {/* Play Pause field */}
+          <div
+            className="active:scale-95 ease-in-out transition-all"
+            onClick={handlePlayPauseButtonClick}
+          >
+            {isPlaying ? (
+              <IconPlayerPauseFilled
+                data-tooltip-id="tooltip"
+                data-tooltip-content="Pause"
+                className="stroke-1 w-7 h-7 opacity-75 hover:opacity-100 transition-all ease-in-out cursor-pointer"
+              />
+            ) : (
+              <IconPlayerPlayFilled
+                data-tooltip-id="tooltip"
+                data-tooltip-content="Play"
+                className="stroke-1 w-7 h-7 opacity-75 hover:opacity-100 transition-all ease-in-out cursor-pointer"
+              />
+            )}
           </div>
           <div className="flex gap-4">
             <IconArrowBackUp
@@ -154,26 +248,48 @@ export default function page() {
             axis="x"
             bounds="parent"
             position={{ x: timelineWidth, y: 0 }}
+            onStart={() => setIsDragging(true)}
             onStop={onTimelineDragStop}
           >
             <div className="w-1 h-48 bg-amber-500 opacity-50 active:opacity-75 rounded-full"></div>
           </Draggable>
         </div>
 
-        {audioFiles.map((audio) => (
-          <div
-            className="rounded-xl h-16 overflow-hidden p-1"
-            style={{ width: audio.width, maxWidth: audio.width }}
-          >
-            {audio.name}
-          </div>
-        ))}
+        <div className="flex px-3 timeline">
+          {audioFiles.map((audio) => (
+            <div
+              key={audio.id}
+              className="rounded-xl h-16 overflow-hidden p-1 ring"
+              style={{ width: audio.width, maxWidth: audio.width }}
+            >
+              {audio.name}
+            </div>
+          ))}
+        </div>
 
         {/*  */}
         <audio
           ref={audioRef}
           onTimeUpdate={handleTimeUpdate}
+          onEnded={handleEnded}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
           controls
+          onSeeked={() => {
+            const currentAudioIndex = audioFiles.findIndex(
+              (audio) => audio.url === audioRef.current.src
+            );
+            if (audioFiles && audioFiles.length > 0 && currentAudioIndex > 0) {
+              let sum = 0;
+              for (let i = 0; i <= currentAudioIndex - 1; i++) {
+                sum += audioFiles[i].duration;
+              }
+              console.log(sum);
+              setBufferTime(sum);
+            } else {
+              setBufferTime(0);
+            }
+          }}
           className="absolute -top-20"
         ></audio>
       </div>
