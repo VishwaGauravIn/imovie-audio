@@ -15,26 +15,16 @@ import React, { useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 import { Tooltip } from "react-tooltip";
 
-interface AudioFile {
-  id: number;
-  name: string;
-  url: string;
-  duration: number;
-  width: string;
-  artist: string;
-  albumArt: string;
-}
-
 export default function page() {
   // assuming that timeline is of 10min
 
-  const [audioFiles, setAudioFiles] = useState<any[]>([]);
-  const [timelineWidth, setTimelineWidth] = useState<number>(0);
-  const [bufferTime, setBufferTime] = useState<number>(0); // [0, 600] 10min timeline assuming
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const timelineWidthRef = useRef<Draggable>(null);
+  const [audioFiles, setAudioFiles] = useState([]);
+  const [timelineWidth, setTimelineWidth] = useState(0);
+  const [bufferTime, setBufferTime] = useState(0); // [0, 600] 10min timeline assuming
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const audioRef = useRef(null);
+  const timelineWidthRef = useRef(null);
 
   const handleAddAudio = () => {
     const input = document.createElement("input");
@@ -45,20 +35,20 @@ export default function page() {
     input.click();
   };
 
-  const handleFileChange = (e: Event) => {
-    const target = e.target as HTMLInputElement;
+  const handleFileChange = (e) => {
+    const target = e.target 
     const files = Array.from(target.files || []);
     const updatedAudioFiles = files.map((file, index) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
         const audioElement = document.createElement("audio");
-        audioElement.src = reader.result as string;
+        audioElement.src = reader.result;
         audioElement.onloadedmetadata = () => {
-          const audio: any = {
+          const audio = {
             id: audioFiles.length + index + 1,
             name: file.name,
-            url: reader.result as string,
+            url: reader.result,
             duration: audioElement.duration,
             width: (audioElement.duration / (60 * 10)) * 100 + "%", // 10min timeline assuming
             artist: "", // You can extract artist info if available
@@ -225,8 +215,6 @@ export default function page() {
     }
   }
 
-  console.log(audioFiles);
-
   return (
     <main className="min-h-[100vh] h-[100vh] flex flex-col justify-between relative">
       <nav className="bg-[#121212] shadow-xl justify-between items-center flex w-full h-14 p-2 text-white">
@@ -356,7 +344,6 @@ export default function page() {
               for (let i = 0; i <= currentAudioIndex - 1; i++) {
                 sum += audioFiles[i].duration;
               }
-              console.log(sum);
               setBufferTime(sum);
             } else {
               setBufferTime(0);
