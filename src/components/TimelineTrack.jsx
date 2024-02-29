@@ -1,7 +1,13 @@
 import React from "react";
 import Draggable from "react-draggable";
 
-export default function TimelineTrack({ audioFiles, setIsDragging, setAudioFiles, audioRef, timelineWidthRef}) {
+export default function TimelineTrack({
+  audioFiles,
+  setIsDragging,
+  setAudioFiles,
+  audioRef,
+  timelineWidthRef,
+}) {
   const onAudioTrackDragStop = (e, trackIndex) => {
     setIsDragging(true);
     const timelineElement = document.getElementById("timeline");
@@ -65,7 +71,7 @@ export default function TimelineTrack({ audioFiles, setIsDragging, setAudioFiles
     }
   }
   return (
-    <div id="timeline-track" className="flex px-3">
+    <div id="timeline-track" className="flex px-3 gap-1">
       {audioFiles.map((audio, index) => (
         <Draggable
           key={audio.id}
@@ -75,10 +81,12 @@ export default function TimelineTrack({ audioFiles, setIsDragging, setAudioFiles
           onStop={(e) => onAudioTrackDragStop(e, index)}
         >
           <div
-            className="rounded-xl h-16 overflow-hidden p-1 ring audio-track"
+            className="rounded-xl h-16 p-4 ring-1 audio-track ring-zinc-700 bg-zinc-800 flex items-center overflow-hidden"
             style={{ width: audio.width, maxWidth: audio.width }}
           >
-            {audio.name}
+            <div className="text-ellipsis whitespace-nowrap max-w-full overflow-hidden">
+              {audio.name}
+            </div>
           </div>
         </Draggable>
       ))}

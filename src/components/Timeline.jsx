@@ -40,7 +40,10 @@ export default function Timeline({
     }
   }
   return (
-    <div id="timeline" className="h-[calc(100% - 56px)] px-2 absolute w-full">
+    <div
+      id="timeline"
+      className="h-[calc(100% - 56px)] px-2 absolute w-full z-10"
+    >
       <Draggable
         axis="x"
         bounds="parent"
