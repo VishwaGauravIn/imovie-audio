@@ -2,7 +2,7 @@ import React from "react";
 
 import { IconHelp, IconPlus, IconSettings } from "@tabler/icons-react";
 
-export default function Navbar({ handleFileChange }) {
+export default function Navbar({ setAudioFiles, audioFiles, audioRef}) {
   const handleAddAudio = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -10,6 +10,38 @@ export default function Navbar({ handleFileChange }) {
     input.accept = "audio/*";
     input.addEventListener("change", handleFileChange);
     input.click();
+  };
+
+  const handleFileChange = (e) => {
+    const target = e.target;
+    const files = Array.from(target.files || []);
+    const updatedAudioFiles = files.map((file, index) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const audioElement = document.createElement("audio");
+        audioElement.src = reader.result;
+        audioElement.onloadedmetadata = () => {
+          const audio = {
+            id: audioFiles.length + index + 1,
+            name: file.name,
+            url: reader.result,
+            duration: audioElement.duration,
+            width: (audioElement.duration / (60 * 10)) * 100 + "%", // 10min timeline assuming
+            artist: "", // You can extract artist info if available
+            albumArt: "", // You can extract album art if available
+          };
+          setAudioFiles((prevState) => [...prevState, audio]);
+          if (audioFiles.length === 0) {
+            if (audioRef.current) {
+              audioRef.current.src = audio.url;
+              audioRef.current.load();
+              audioRef.current.play();
+            }
+          }
+        };
+      };
+    });
   };
   return (
     <nav className="bg-[#121212] shadow-xl justify-between items-center flex w-full h-14 p-2 text-white">
