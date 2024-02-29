@@ -9,7 +9,7 @@ import TimelineRibbon from "@/components/TimelineRibbon";
 import AudioComponent from "@/components/AudioComponent";
 import Timeline from "@/components/Timeline";
 
-export default function page() {
+export default function Page() {
   // assuming that timeline is of 10min
 
   const [audioFiles, setAudioFiles] = useState([]);
