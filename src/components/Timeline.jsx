@@ -1,5 +1,6 @@
 import React from "react";
 import Draggable from "react-draggable";
+import TimelineTrack from "./TimelineTrack";
 
 export default function Timeline({
   audioFiles,
@@ -8,6 +9,7 @@ export default function Timeline({
   timelineWidth,
   setTimelineWidth,
   timelineWidthRef,
+  setAudioFiles,
 }) {
   function onTimelineDragStop(e) {
     const timelineElement = document.getElementById("timeline");
@@ -40,10 +42,7 @@ export default function Timeline({
     }
   }
   return (
-    <div
-      id="timeline"
-      className="h-[calc(100% - 56px)] px-2 absolute w-full z-10"
-    >
+    <div id="timeline" className="h-[calc(100% - 56px)] px-2 w-full relative">
       <Draggable
         axis="x"
         bounds="parent"
@@ -52,8 +51,15 @@ export default function Timeline({
         onStop={onTimelineDragStop}
         ref={timelineWidthRef}
       >
-        <div className="w-1 h-48 bg-amber-500 opacity-50 active:opacity-75 rounded-full"></div>
+        <div className="w-1 h-48 bg-amber-500 opacity-50 active:opacity-75 rounded-full absolute z-10 cursor-pointer"></div>
       </Draggable>
+      <TimelineTrack
+        audioFiles={audioFiles}
+        setIsDragging={setIsDragging}
+        setAudioFiles={setAudioFiles}
+        audioRef={audioRef}
+        timelineWidthRef={timelineWidthRef}
+      />
     </div>
   );
 }

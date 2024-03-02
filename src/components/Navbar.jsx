@@ -1,8 +1,13 @@
 import React from "react";
 
-import { IconHelp, IconPlus, IconSettings } from "@tabler/icons-react";
+import {
+  IconExternalLink,
+  IconHelp,
+  IconPlus,
+  IconSettings,
+} from "@tabler/icons-react";
 
-export default function Navbar({ setAudioFiles, audioFiles, audioRef}) {
+export default function Navbar({ setAudioFiles, audioFiles, audioRef }) {
   const handleAddAudio = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -45,9 +50,14 @@ export default function Navbar({ setAudioFiles, audioFiles, audioRef}) {
   };
   return (
     <nav className="bg-[#121212] shadow-xl justify-between items-center flex w-full h-14 p-2 text-white">
-      <button className="opacity-75 hover:opacity-100 transition-all ease-in-out">
-        Done
-      </button>
+      <a
+        href="https://github.com/VishwaGauravIn/imovie-audio"
+        target="_blank"
+        rel="noreferrer noopener"
+        className="opacity-75 hover:opacity-100 transition-all ease-in-out flex justify-center items-center gap-1 text-fuchsia-300"
+      >
+        GitHub <IconExternalLink className="stroke-1 w-5 h-5" />
+      </a>
       <p className="">The Ocean</p>
       <div className="flex gap-4">
         <IconHelp

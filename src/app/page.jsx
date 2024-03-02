@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import Navbar from "@/components/Navbar";
 import DisplaySection from "@/components/DisplaySection";
-import TimelineTrack from "@/components/TimelineTrack";
 import TimelineRibbon from "@/components/TimelineRibbon";
 import AudioComponent from "@/components/AudioComponent";
 import Timeline from "@/components/Timeline";
@@ -53,16 +52,10 @@ export default function Page() {
         <Timeline
           audioFiles={audioFiles}
           audioRef={audioRef}
+          setAudioFiles={setAudioFiles}
           setIsDragging={setIsDragging}
           timelineWidth={timelineWidth}
           setTimelineWidth={setTimelineWidth}
-          timelineWidthRef={timelineWidthRef}
-        />
-        <TimelineTrack
-          audioFiles={audioFiles}
-          setIsDragging={setIsDragging}
-          setAudioFiles={setAudioFiles}
-          audioRef={audioRef}
           timelineWidthRef={timelineWidthRef}
         />
 

@@ -81,7 +81,7 @@ export default function TimelineTrack({
           onStop={(e) => onAudioTrackDragStop(e, index)}
         >
           <div
-            className="rounded-xl h-16 p-4 ring-1 audio-track ring-zinc-700 bg-zinc-800 flex items-center overflow-hidden"
+            className="rounded-xl h-16 p-4 ring-1 audio-track ring-zinc-700 bg-zinc-800 flex items-center overflow-hidden select-none cursor-move"
             style={{ width: audio.width, maxWidth: audio.width }}
           >
             <div className="text-ellipsis whitespace-nowrap max-w-full overflow-hidden">
