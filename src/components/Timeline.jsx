@@ -42,7 +42,7 @@ export default function Timeline({
     }
   }
   return (
-    <div id="timeline" className="h-[calc(100% - 56px)] px-2 w-full relative">
+    <div id="timeline" className="h-[calc(100%-56px)] px-2 w-full relative">
       <Draggable
         axis="x"
         bounds="parent"
@@ -50,8 +50,9 @@ export default function Timeline({
         onStart={() => setIsDragging(true)}
         onStop={onTimelineDragStop}
         ref={timelineWidthRef}
+        // defaultClassName="h-full"
       >
-        <div className="w-1 h-48 bg-amber-500 opacity-50 active:opacity-75 rounded-full absolute z-10 cursor-pointer"></div>
+        <div className="w-1 mx-2 h-full bg-amber-500 opacity-50 active:opacity-75 rounded-full absolute z-10 cursor-pointer"></div>
       </Draggable>
       <TimelineTrack
         audioFiles={audioFiles}
